@@ -3,6 +3,8 @@ FROM python:3.12
 
 EXPOSE 8000
 
+RUN apt-get update && apt-get install -y postgresql-client build-essential libpq-dev && apt-get clean && rm -rf /var/lib/apt/lists/*
+
 # Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
 
