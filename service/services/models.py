@@ -15,7 +15,7 @@ class Plan(models.Model):
         ('business', 'Бизнес'),
     )
     
-    plan_type = models.CharField(max_length=10, choices=PLAN_TYPES)
+    plan_type = models.CharField(max_length=10, choices=PLAN_TYPES, default='full')
     discount_percent = models.PositiveIntegerField(default=0, 
                                                    validators=[
                                                        MaxValueValidator(100)

@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 
 class Client(models.Model):
     user = models.OneToOneField(User, on_delete=models.PROTECT)
+    email = models.CharField(max_length=100, default=None)
     company_name = models.CharField(max_length=100)
     full_adress = models.CharField(max_length=100)
     
