@@ -1,11 +1,24 @@
 from django.db import models
 from django.core.validators import MaxValueValidator
 from clients.models import Client
+from tasks import set_price
 
 
 class Service(models.Model):
     name = models.CharField(max_length=100)
     full_price = models.PositiveIntegerField()
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__full_price = self.full_price
+        
+    def save(self, *args, **kwargs):
+        
+        if self.full_price != self.__full_price:
+            for subscription in self.subscriprions.all():
+                set_price.delay(subscription.id)
+    
+        return super().save(*args, **kwargs)
     
 
 class Plan(models.Model):
@@ -20,10 +33,29 @@ class Plan(models.Model):
                                                    validators=[
                                                        MaxValueValidator(100)
                                                        ])
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.__discoubt_percent = self.discount_percent
+    
+    def save(self, *args, **kwargs):
+        
+        if self.discount_percent != self.__discount_percent:
+            for subscription in self.subscriprions.all():
+                set_price.delay(subscription.id)
+    
+        return super().save(*args, **kwargs)
 
 
 class Subscription(models.Model):
     client = models.ForeignKey(Client, on_delete=models.PROTECT, related_name='subscriptions')
     service = models.ForeignKey(Service, on_delete=models.PROTECT, related_name='subscriptions')
     plan = models.ForeignKey(Plan, on_delete=models.PROTECT, related_name="subscriptions")
+    price = models.PositiveBigIntegerField(default=0)
+    
+    def save(self, *args, save_model=True, **kwargs):
+        if save_model:
+            set_price.delay(self.id)
+        
+        return super().save(*args, **kwargs)
     
